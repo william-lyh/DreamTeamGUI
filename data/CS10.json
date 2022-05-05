@@ -1,66 +1,78 @@
 {
-    "id": "0",
     "name": "CS10",
-    "parent": "null",
-    "children": [
-        {
-            "id": "2",
-            "name": "Testing and HW3",
-            "parent": "CS10",
-            "children": [],
-            "data": {
-                "week": 1
-            }
-        },
-        {
-            "id": "3",
-            "name": "Computing and the Environment",
-            "parent": "CS10",
-            "children": [
-                {
-                    "id": "4",
-                    "name": "Privacy",
-                    "parent": "Computing and the Environment",
-                    "children": [],
-                    "data": {
-                        "week": 2
-                    }
-                },
-                {
-                    "id": "6",
-                    "name": "Alumni Panel",
-                    "parent": "Computing and the Environment",
-                    "children": [
-                        {
-                            "id": "7",
-                            "name": "Application",
-                            "parent": "Alumni Panel",
-                            "children": [],
-                            "data": {
-                                "week": 5
-                            }
-                        }
-                    ],
-                    "data": {
-                        "week": 3
-                    }
+    "term": "Fall 2021",
+    "levels": {
+        "not-learned": "#000000",
+        "unfamiliar": "#B2BEB5",
+        "new": "#FFFF00",
+        "intermediate": "#FFA500",
+        "proficient": "#228B22"
+    },
+    "count": 8,
+    "nodes": {
+        "id": "0",
+        "name": "CS10",
+        "parent": "null",
+        "children": [
+            {
+                "id": "2",
+                "name": "Testing and HW3",
+                "parent": "CS10",
+                "children": [],
+                "data": {
+                    "week": 1
                 }
-            ],
-            "data": {
-                "week": 5
+            },
+            {
+                "id": "3",
+                "name": "Computing & Environment",
+                "parent": "CS10",
+                "children": [
+                    {
+                        "id": "4",
+                        "name": "Privacy",
+                        "parent": "Computing & Environment",
+                        "children": [],
+                        "data": {
+                            "week": 2
+                        }
+                    },
+                    {
+                        "id": "6",
+                        "name": "Alumni Panel",
+                        "parent": "Computing & Environment",
+                        "children": [
+                            {
+                                "id": "7",
+                                "name": "Application",
+                                "parent": "Alumni Panel",
+                                "children": [],
+                                "data": {
+                                    "week": 5
+                                }
+                            }
+                        ],
+                        "data": {
+                            "week": 3
+                        }
+                    }
+                ],
+                "data": {
+                    "week": 5
+                }
+            },
+            {
+                "id": "5",
+                "name": "AI",
+                "parent": "CS10",
+                "children": [],
+                "data": {
+                    "week": 5
+                }
             }
-        },
-        {
-            "id": "5",
-            "name": "AI",
-            "parent": "CS10",
-            "children": [],
-            "data": {
-                "week": 5
-            }
+        ],
+        "data": {
+            "week": 0
         }
-    ],
-    "data": {
-        "week": 0
     }
 }

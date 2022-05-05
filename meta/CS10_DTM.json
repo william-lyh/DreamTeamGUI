@@ -14,6 +14,13 @@
             "fillcolor": "#5efaf7"
         }
     },
+    "levels": {
+        "not-learned": "#000000",
+        "unfamiliar": "#B2BEB5",
+        "new": "#FFFF00",
+        "intermediate": "#FFA500",
+        "proficient": "#228B22"
+    },
     "nodes": [
         {
             "name": 1,
@@ -31,7 +38,7 @@
         },
         {
             "name": 3,
-            "label": "Computing and the Environment",
+            "label": "Computing & Environment",
             "week": 5,
             "class": "default",
             "priority": 1

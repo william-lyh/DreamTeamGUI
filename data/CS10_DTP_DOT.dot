@@ -3,7 +3,7 @@ digraph G {
 	node0[label = "CS10", shape = ellipse, style = filled, fillcolor = "#e0e0e0"];
 	node1[label = "Abstraction", shape = ellipse, style = filled, fillcolor = "#5efaf7"];
 	node2[label = "Testing and HW3", shape = ellipse, style = filled, fillcolor = "#e0e0e0"];
-	node3[label = "Computing and the Environment", shape = ellipse, style = filled, fillcolor = "#e0e0e0"];
+	node3[label = "Computing & Environment", shape = ellipse, style = filled, fillcolor = "#e0e0e0"];
 	node4[label = "Privacy", shape = ellipse, style = filled, fillcolor = "#e0e0e0"];
 	node5[label = "AI", shape = ellipse, style = filled, fillcolor = "#e0e0e0"];
 	node6[label = "Alumni Panel", shape = ellipse, style = filled, fillcolor = "#e0e0e0"];

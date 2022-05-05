@@ -65,10 +65,11 @@ Dream Team Parser
 
 Parser for Dream Team GUI - a Concept Map
 """
+
+
 class DreamTeamParser:
-    PRE_INFO_PATTERN = r'[\s]*/\*[\s]*Priority\sLevel\s=\s([1-5])[\s]*' \
-                       r'Time\s=\s([\d]{2})([\d]{2})([\d]{4})[\s]*\*/[\s]*'
-    NODE_PATTERN = r'[\s]*node([\d]+)\[label = "([A-Za-z\d\s]+)"'
+    PRE_INFO_PATTERN = r'[\s]*rankdir = (.+)'
+    NODE_PATTERN = r'[\s]*node(.*)\['
     PATH_PATTERN = r'[\s]*node([\d]+)[\s]*->[\s]*node([\d]+);[\s]*\n'
     MULTI_PATH_MATCH_PATTERN = re.compile(r'[\s]*\{(node(\d)+,\s)+node(\d)+\}[\s]*->[\s]*node([\d]+);[\s]*\n')
     MULTI_PATH_EXTRACT_PATTERN = re.compile(r'node(\d+)')
@@ -76,10 +77,12 @@ class DreamTeamParser:
 
     def __init__(self, file_name, priority_cutoff):
         self.file_name = file_name
-        # self.dot = open("{}.dot".format(file_name), "r")
-        self.dtm = open("meta/{}_DTM.json".format(file_name), "r")
+        self.dtm = None
+        self.name = ""
+        self.term = ""
+        self.levels = None
         self.priority_cutoff = priority_cutoff
-        # self.dot_lines = self.dot.readlines()
+        self.dot_lines = None
         self.nodes = []
         self.filtered_nodes = []
         self.paths = []
@@ -92,7 +95,11 @@ class DreamTeamParser:
                     "priority level {}\n".format(datetime.now(), self.file_name, self.priority_cutoff)
 
     def read_json(self):
+        self.dtm = open("meta/{}_DTM.json".format(self.file_name), "r")
         dtm_data = json.load(self.dtm)
+        self.name = dtm_data["name"]
+        self.term = dtm_data["term"]
+        self.levels = dtm_data["levels"]
         self.rankdir = dtm_data["rankdir"]
         self.classes = dtm_data["styles"]
         for node in dtm_data["nodes"]:
@@ -105,12 +112,21 @@ class DreamTeamParser:
         self.find_root()
         return
 
-    def read_dot(self):
+    def read_dot(self, dot_name):
+        self.name = self.file_name
+        self.classes["default"] = {
+            "shape": "ellipse",
+            "style": "filled",
+            "fillcolor": "#e0e0e0"
+        }
+        with open("data/{}.dot".format(dot_name)) as dot_file:
+            self.dot_lines = dot_file.readlines()
         for i in range(len(self.dot_lines)):
             dot_line = self.dot_lines[i]
-            if re.compile(DreamTeamParser.PRE_INFO_PATTERN).fullmatch(dot_line):
-                dot_line_ahead = self.dot_lines[i + 1]
-                self.read_node(dot_line, dot_line_ahead)
+            if re.compile(DreamTeamParser.PRE_INFO_PATTERN).match(dot_line):
+                self.rankdir = re.search(DreamTeamParser.PRE_INFO_PATTERN, dot_line).groups()[0]
+            elif re.compile(DreamTeamParser.NODE_PATTERN).match(dot_line):
+                self.read_node(dot_line)
             elif re.compile(DreamTeamParser.PATH_PATTERN).fullmatch(dot_line):
                 self.read_path(dot_line)
             elif re.compile(DreamTeamParser.MULTI_PATH_MATCH_PATTERN).fullmatch(dot_line):
@@ -125,19 +141,45 @@ class DreamTeamParser:
         self.log += "{}: Parsed and verified {} paths \n".format(
             datetime.now(), len(self.paths))
 
-    def read_node(self, dot_line, dot_line_ahead):
-        if not re.compile(DreamTeamParser.NODE_PATTERN).match(dot_line_ahead):
-            self.log += "{}: Invalid definition ({}) after pre info ({})\n".format(
-                datetime.now(), dot_line, dot_line_ahead)
-        pre_info = re.search(DreamTeamParser.PRE_INFO_PATTERN, dot_line).groups()
-        priority, month, day, year = map(lambda x: int(x), pre_info)
-        node = re.search(DreamTeamParser.NODE_PATTERN, dot_line_ahead).groups()
-        name, text = int(node[0]), node[1]
-        if priority <= self.priority_cutoff:
-            self.add_node(name, text, priority, month, day, year)
+    def read_node(self, dot_line):
+        try:
+            node_label = re.search(r'label\s*=\s*"\s*([^"]+)\s*"', dot_line).groups()[0]
+        except:
+            try:
+                node_label = re.search(r'label\s*=\s*<\s*(.+)\s*>', dot_line).groups()[0]
+            except:
+                print(dot_line)
+                raise RuntimeError
+
+        node_label = re.sub(r'<([^>]+)>', "", node_label)
+        node_label = re.sub(r'\s+$', "", node_label)
+        node_label = re.sub(r'\\n', "", node_label)
+
+        node_color_matching = re.search(r'fillcolor = "?([#A-Za-z\d\s]+)"?', dot_line)
+        if node_color_matching:
+            node_color = node_color_matching.groups()[0]
         else:
-            self.log += "{}: Node{} with priority level {} ignored under cutoff {}\n".format(
-                datetime.now(), name, priority, self.priority_cutoff)
+            node_color = "#e0e0e0"
+        node_style_matching = re.search(r'style = "?([A-Za-z\d\s]+)"?', dot_line)
+        if node_style_matching:
+            node_style = node_style_matching.groups()[0]
+        else:
+            node_style = "filled"
+        node_shape_matching = re.search(r'shape = "?([A-Za-z\d\s]+)"?', dot_line)
+        if node_shape_matching:
+            node_shape = node_shape_matching.groups()[0]
+        else:
+            node_shape = "ellipse"
+        for style_name, style in self.classes.items():
+            if style["shape"] == node_shape and style["style"] == node_style and style["fillcolor"] == node_color:
+                self.add_node(len(self.nodes), node_label, 0, 0, style_name)
+                return
+        self.classes["style{}".format(len(self.classes) + 1)] = {
+            "shape": node_shape,
+            "style": node_style,
+            "fillcolor": node_color
+        }
+        self.add_node(len(self.nodes), node_label, 0, 0, "style{}".format(len(self.classes)))
 
     def expand_node(self, name):
         if name < len(self.nodes):
@@ -150,6 +192,8 @@ class DreamTeamParser:
     def add_node(self, name, text, priority, week, style_class):
         self.expand_node(name)
         self.nodes[name] = Node(name, text, priority, week, style_class)
+        if text.lower().strip() == self.name.lower().strip():
+            self.root = self.nodes[name]
         if priority <= self.priority_cutoff:
             self.filtered_nodes[name] = Node(name, text, priority, week, style_class)
         else:
@@ -230,10 +274,58 @@ class DreamTeamParser:
         self.log += "{}: Wrote to JSON; File titled {}.json\n".format(
             datetime.now(), self.file_name)
 
-    def to_json_tree(self):
-        nodes_json_tree = self.json_tree_generator(self.filtered_root)
+    def to_json_meta(self):
+        meta_json = {
+            "name": self.name,
+            "term": "",
+            "rankdir": self.rankdir,
+            "styles": self.classes,
+            "levels": {
+                "not-learned": "#000000",
+                "unfamiliar": "#B2BEB5",
+                "new": "#FFFF00",
+                "intermediate": "#FFA500",
+                "proficient": "#228B22"
+            },
+            "nodes": [],
+            "edges": []
+        }
+        for node in self.nodes:
+            if node == self.root:
+                continue
+            meta_json["nodes"].append({
+                "name": node.get_name(),
+                "label": node.get_text(),
+                "week": node.get_week(),
+                "class": node.get_style_class(),
+                "priority": node.get_priority()
+            })
+        for path in self.paths:
+            if self.root and self.root.get_name() in path:
+                continue
+            start_node_found = False
+            for meta_json_path in meta_json["edges"]:
+                if meta_json_path["from"] == path[0]:
+                    meta_json_path["to"].append(path[1])
+                    start_node_found = True
+            if not start_node_found:
+                meta_json["edges"].append({
+                    "from": path[0],
+                    "to": [path[1]]
+                })
+        with open('meta/{}_DTM_PARSED.json'.format(self.file_name), 'w', encoding='utf-8') as json_file:
+            json.dump(meta_json, json_file, indent=4)
+
+    def to_json_data(self):
+        json_data = {
+            "name": self.name,
+            "term": self.term,
+            "levels": self.levels,
+            "count": len(self.nodes),
+            "nodes": self.json_tree_generator(self.filtered_root)
+        }
         with open('data/{}.json'.format(self.file_name), 'w', encoding='utf-8') as json_file:
-            json.dump(nodes_json_tree, json_file, indent=4)
+            json.dump(json_data, json_file, indent=4)
         self.log += "{}: Wrote to JSON; File titled {}.json\n".format(
             datetime.now(), self.file_name)
 
@@ -283,7 +375,7 @@ class DreamTeamParser:
 
     def parse(self):
         self.read_json()
-        self.to_json_tree()
+        self.to_json_data()
         self.write_dot()
         self.write_log()
         self.close_files()
@@ -291,4 +383,9 @@ class DreamTeamParser:
 
 if __name__ == '__main__':
     DTP = DreamTeamParser(file_name=sys.argv[1], priority_cutoff=int(sys.argv[2]))
+    '''
+    DTP.read_dot("CS10")
+    DTP.to_json_meta()
+    '''
     DTP.parse()
+
