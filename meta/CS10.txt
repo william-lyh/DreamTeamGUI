@@ -1,0 +1,24 @@
+name: CS-Intro
+term: Fall 2022
+orientation: left to right
+styles:
+    name: root, shape: ellipse, style: filled, fillcolor: #3A73A5
+    name: blue1, shape: ellipse, style: filled, fillcolor: #74B3CE
+    name: blue2, shape: ellipse, style: filled, fillcolor: #87CEEB
+    name: default, shape: ellipse, style: filled, fillcolor: #E0E0E0
+student levels:
+    Proficient: #228B22
+    Intermediate: #FFA500
+    Unfamiliar: #FFFF00
+    Not Learned: #808080
+nodes:
+    Higher-Order Functions [blue1, Week1]
+        Conditionals [blue2, Week1]
+            Boolean Logic [default, Week1]
+        Function Composition [blue2, Week2]
+        Functions [blue2, Week3]
+            Abstraction [default, Week3]
+            Domain and Range [default, Week3]
+            Variable Scope [default, Week4]
+            Debugging [default, Week5]
+end
