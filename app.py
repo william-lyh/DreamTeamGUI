@@ -25,9 +25,6 @@ def index():
                            course_name=course_name,
                            graphviz_svg=Markup(svg))
 
-def app():
-    app.run(debug=False, port=33507)
-
 
 if __name__ == '__main__':
     app.run(debug=False, port=33507)
