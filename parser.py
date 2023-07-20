@@ -283,4 +283,4 @@ def generate_map(name, token, student_mastery):
     to_svg(name, token)
 
 
-generate_map("CS10", "", "322113200")
+# generate_map("CS10", "", "322113200")
