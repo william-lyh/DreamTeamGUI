@@ -15,39 +15,18 @@
             stroke-width: 3px;
         }
 
-        .new circle {
-            fill: coral;
-            stroke: coral;
-        }
-
-        .in-process circle {
-            fill: burlywood;
-            stroke: burlywood;
-        }
-
-        .learned circle {
-            fill: darkolivegreen;
-            stroke: darkolivegreen;
-        }
-
-        .node text {
-            font: 12px sans-serif;
-        }
-
-        .link {
-            fill: none;
-            stroke: #ccc;
-            stroke-width: 2px;
-        }
-
-        #legends-wrapper {
+        #legend-wrapper {
             display: flex;
-            justify-content: center;
-            justify-items: center;
+            flex-direction: row;
+            padding-top: 20px;
+            padding-bottom: 25px;
         }
 
-        #legends {
-         margin: 50px;
+        .legend-container {
+            margin-left: 10%;
+            height: fit-content;
+            width: fit-content;
+            overflow: scroll;
         }
 
         #graphviz-container {
@@ -63,9 +42,13 @@
 </head>
 
 <body>
-    <div id="legends-wrapper">
-        <div id="legends">
-        <h2> {{ course_name }} Course Progress Report </h2>
+    <h1> {{ course_name }} Course Progress Report </h1>
+    <div id="legend-wrapper">
+        <div id="edge-legend-container" class="legend-container">
+            {{ node_legend_svg }}
+        </div>
+        <div id="edge-legend-container" class="legend-container">
+            {{ edge_legend_svg }}
         </div>
     </div>
     <div id="graphviz-container">

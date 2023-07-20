@@ -1,4 +1,4 @@
-Flask
+Flask~=2.3.1
 gunicorn
 MarkupSafe~=2.1.2
 graphviz~=0.20.1

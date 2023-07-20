@@ -206,10 +206,74 @@ def to_dot(name, token, student_mastery, orientation, start_date, term, class_le
     dot_out_file.write(dot_out)
     dot_out_file.close()
 
+    edge_legend_out_file = open('data/{}_{}_edge_legend.dot'.format(name, token), 'w', encoding='utf-8')
+    edge_legend_out = """
+digraph G {    
+    subgraph clusterLegend { 
+    label = "Class Levels (Edges)";
+    fontsize = 20
+    node [ color="white" ] {rank=same; keyLeft, keyRight}
+    keyLeft [ label=<<table border="0" cellpadding="1" cellspacing="0" cellborder="0">
+      <tr><td align="right" port="i1"> </td></tr>
+      <tr><td align="right" port="i2"> </td></tr>
+      </table>> ]
+    keyRight [ label=<<table border="0" cellpadding="1" cellspacing="0" cellborder="0">
+      <tr><td align="left" port="i1"> </td><td>Not Taught</td></tr>
+      <tr><td align="left" port="i2"> </td><td>Taught</td></tr>
+      </table>>] \n
+      """
+    edge_legend_out += "\tkeyLeft:i1 -> keyRight:i1 " \
+                       "[arrowhead=none, penwidth=3, color=\"{}\"] \n".format(class_levels["Not Taught"])
+    edge_legend_out += "\tkeyLeft:i2 -> keyRight:i2 " \
+                       "[arrowhead=none, penwidth=3, color=\"{}\"] \n".format(class_levels["Taught"])
+    edge_legend_out += """
+   }
+}
+    """
+    edge_legend_out_file.write(edge_legend_out)
+    edge_legend_out_file.close()
+
+    node_legend_out_file = open('data/{}_{}_node_legend.dot'.format(name, token), 'w', encoding='utf-8')
+    node_legend_out = """digraph G {    
+    subgraph clusterLegend { 
+    label = "Student Levels (Node Borders)";
+    fontsize = 20
+    node [ color="white" ] {rank=same; keyLeft, keyRight} \n"""
+    student_levels_items = list(student_levels.items())
+
+    node_legend_out += "\tkeyLeft [ label=<<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" cellborder=\"0\"> \n"
+    for i in range(len(student_levels_items)):
+        node_legend_out += "\t\t\t<tr><td align=\"right\" port=\"i{}\"> </td></tr> \n".format(i + 1)
+    node_legend_out += "\t\t</table>> ] \n"
+
+    node_legend_out += "\tkeyRight [ label=<<table border=\"0\" cellpadding=\"1\" cellspacing=\"0\" cellborder=\"0\"> \n"
+    for i in range(len(student_levels_items)):
+        node_legend_out += "\t\t<tr><td align=\"left\" port=\"i{}\"> " \
+                           "</td><td>{}</td></tr> \n".format(i + 1, student_levels_items[i][0])
+    node_legend_out += "\t</table>> ] \n"
+
+    for i in range(len(student_levels_items)):
+        node_legend_out += "\tkeyLeft:i{} -> keyRight:i{} " \
+                           "[arrowhead=none, penwidth=3, color=\"{}\"] \n".format(i + 1, i + 1, student_levels_items[i][1])
+    node_legend_out += """\t}
+}
+    """
+    node_legend_out_file.write(node_legend_out)
+    node_legend_out_file.close()
+
 
 def to_svg(name, token):
     dot = graphviz.Source.from_file("data/{}_{}.dot".format(name, token))
     dot.render(format="svg", cleanup=True, outfile="data/{}_{}.svg".format(name, token))
+    os.remove("data/{}_{}.dot".format(name, token))
+
+    edge_legend_dot = graphviz.Source.from_file("data/{}_{}_edge_legend.dot".format(name, token))
+    edge_legend_dot.render(format="svg", cleanup=True, outfile="data/{}_{}_edge_legend.svg".format(name, token))
+    os.remove("data/{}_{}_edge_legend.dot".format(name, token))
+
+    node_legend_dot = graphviz.Source.from_file("data/{}_{}_node_legend.dot".format(name, token))
+    node_legend_dot.render(format="svg", cleanup=True, outfile="data/{}_{}_node_legend.svg".format(name, token))
+    os.remove("data/{}_{}_node_legend.dot".format(name, token))
 
 
 def generate_map(name, token, student_mastery):
@@ -219,4 +283,4 @@ def generate_map(name, token, student_mastery):
     to_svg(name, token)
 
 
-# generate_map("CS10", "", "322113200")
+generate_map("CS10", "", "322113200")
